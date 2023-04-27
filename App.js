@@ -1,17 +1,14 @@
-import React, { useContext } from 'react';
-import { AuthProvider } from './src/providers/AuthProvider';
-import { AuthStack, RootStack } from './src/routes';
+import React from 'react';
 
 import { NavigationContainer } from '@react-navigation/native';
-import { AuthContext } from './src/providers/AuthProvider';
-import { Text, View } from 'react-native';
+import Navigation from "./Navigation"
 
+import { AuthStack } from './src/routes';
 
 export default function App() {
-  const { user } = useContext(AuthContext);
-  console.log("Fasdf")
   return (
-    <View><Text>Hello</Text></View>
+    <NavigationContainer>
+      <Navigation />
+    </NavigationContainer>
   );
-
 }
