@@ -50,6 +50,7 @@ function Register({ navigation }) {
         username: values.username,
         email: values.email,
         password: values.password,
+        type: "1",
       }
       var res = await userService.addUser(data)
 

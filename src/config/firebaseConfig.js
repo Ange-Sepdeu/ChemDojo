@@ -1,5 +1,6 @@
 // firebaseConfig.js
 import  { initializeApp }  from 'firebase/app';
+import firebase from 'firebase/compat/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 
@@ -15,5 +16,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
+if(!firebase.apps.length){
+    firebase.initializeApp(firebaseConfig)
+}
 
-export { app, firebaseConfig };
+
+export { app, firebaseConfig, firebase };

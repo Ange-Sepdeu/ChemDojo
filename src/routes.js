@@ -5,6 +5,7 @@ import {
 import Register from './views/Authentication/Register';
 import Login from './views/Authentication/Login';
 import Home from './views/Home';
+import Learn from './views/Learn';
 
 
 const Stack = createStackNavigator();
@@ -26,6 +27,7 @@ function RootStack() {
     return (
         <Stack.Navigator>
             <Stack.Screen name="Home" component={Home} />
+            <Stack.Screen name="Learn" component={Learn} />
         </Stack.Navigator>
 
     )
