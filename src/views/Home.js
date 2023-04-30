@@ -17,9 +17,9 @@ function Home({navigation}) {
                 <Text style={tw`text-center text-4xl font-bold mb-10`}>ChemDojo</Text>
                 <View style={tw`flex flex-row justify-evenly items-center flex-wrap`}>
                     <View style={tw`mb-5`}>
-                        <TouchableOpacity style={tw`rounded-xl bg-white items-center p-2 shadow-black shadow-lg`}>
+                        <TouchableOpacity style={tw`rounded-xl bg-white items-center p-2 shadow-black shadow-lg`}  onPress={() => navigation.navigate("QuizTopic")}>
                             <Image source={require("../../assets/games.png")} resizeMode='contain' style={tw`w-30 h-20`} />
-                            <Text style={tw`text-center text-black text-xl`}>Games</Text>
+                            <Text style={tw`text-center text-black text-xl`}>Quiz</Text>
                         </TouchableOpacity>
                     </View>
                     <View style={tw`mb-5`}>

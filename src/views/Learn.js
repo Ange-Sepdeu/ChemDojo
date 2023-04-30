@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useMemo, useContext, useState, useEffect } from 'react'
-import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { MaterialIcons, Entypo } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker';
 import tw from "twrnc"
@@ -133,13 +133,13 @@ function Learn({ navigation }) {
             {
               learningTopics.map((item, index) => {
                 return (
-                  <View onPress={() => navigation.navigate("LearnDetails", { item })} key={index} style={tw` bg-cyan-50 rounded-4 p-6 mb-5 flex flex-row items-center`}>
+                  <Pressable onPress={() => navigation.navigate("MoleculeDetails", { item })} key={index} style={tw` bg-cyan-50 rounded-4 p-6 mb-5 flex flex-row items-center`}>
                     <View><Image source={require("../../assets/chemdojo2.jpg")} resizeMode='contain' style={tw`w-20 h-20`} /></View>
                     <View style={tw`ml-5`}>
                       <Text style={tw`font-semibold text-xl`}>{item.topic}</Text>
                       <Text style={tw`text-xs`}>{item.name}</Text>
                     </View>
-                  </View>
+                  </Pressable>
                 )
               })
             }
