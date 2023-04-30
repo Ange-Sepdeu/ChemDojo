@@ -1,10 +1,10 @@
 import React from 'react'
-import { ScrollView, Text, View, Image } from 'react-native'
+import { ScrollView, Text, View, Image, TouchableOpacity } from 'react-native'
 import { MaterialIcons, Entypo } from '@expo/vector-icons'
 import tw from "twrnc"
 import { Topics } from '../constants'
 
-function QuizTopics() {
+function QuizTopics({ navigation }) {
   return (
     <ScrollView style={tw`w-full`}>
       <View style={tw`p-8 flex-1`}>
@@ -14,12 +14,14 @@ function QuizTopics() {
           {
             Topics.map((item, index) => {
               return (
-                <View key={index} style={tw` ${item.color} rounded-4 p-6 mb-5 flex flex-row items-center`}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("Quiz")}
+                  key={index} style={tw` ${item.color} rounded-4 p-6 mb-5 flex flex-row items-center`}>
                   <View><Image source={item.src} resizeMode='contain' style={tw`w-20 h-20`} /></View>
                   <View style={tw`ml-5`}>
                     <Text style={tw`font-semibold text-xl`}>{item.name}</Text>
                   </View>
-                </View>
+                </TouchableOpacity>
               )
             })
           }

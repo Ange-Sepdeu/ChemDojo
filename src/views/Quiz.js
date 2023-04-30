@@ -8,7 +8,7 @@ import { Alkanes, Topics } from '../constants'
 import { RadioButton } from 'react-native-paper'
 import { Entypo } from "@expo/vector-icons"
 
-function Quiz() {
+function Quiz({navigation}) {
     const bottomSheetRef = useRef < BottomSheet > (null);
     const snapPoints = useMemo(() => ['10%', '50%'], []);
     const handleSheetChanges = useCallback((index) => {
@@ -73,7 +73,7 @@ function Quiz() {
                                     </View>
                                 </TouchableOpacity>) : null
                             }
-                            <TouchableOpacity style={tw`bg-orange-700 p-4 rounded-2xl`} onPress={() => alert("Validated")}>
+                            <TouchableOpacity style={tw`bg-orange-700 p-4 rounded-2xl`} onPress={() => navigation.navigate("QuizInt")}>
                                 <Text style={tw`text-white`}>Validate</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={tw`items-center`}>
