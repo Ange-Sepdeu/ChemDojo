@@ -26,7 +26,6 @@ function Quiz({ navigation, route }) {
     const [question, setQuestion] = useState("");
     const [modalVisible, setModalVisible] = useState(false);
     const [timer, setTimer] = React.useState({ min: 0, sec: 0 })
-    var expiryDate = new Date().getTime() + 90000
     const [checked, setChecked] = React.useState({ isCheckEd: false, id: 0 })
     const handleCheck = (id) => {
         let i;
@@ -80,12 +79,16 @@ function Quiz({ navigation, route }) {
     }, [quiz])
 
     const addMethod = () => {
-        if (answers.length === 0) {
-            setAnswers([...answers, { answer: addAnswer, correct: true }])
+        if (answers.find((item) => item.answer === addAnswer)) {
+            Alert.alert("this answer already exist")
         } else {
-            setAnswers([...answers, { answer: addAnswer, correct: false }])
+            if (answers.length === 0) {
+                setAnswers([...answers, { answer: addAnswer, correct: true }])
+            } else {
+                setAnswers([...answers, { answer: addAnswer, correct: false }])
+            }
+            setAddAnser("");
         }
-        setAddAnser("");
     }
 
     const addQuiz = async () => {
@@ -194,7 +197,7 @@ function Quiz({ navigation, route }) {
                 <Text style={tw`text-3xl mb-5 text-white`}>Topic: {item.name} </Text>
                 <Text style={tw`text-white font-bold`}> GoodLuck </Text>
                 <View style={tw`flex flex-row justify-between mt-5`}>
-                    <Text style={tw`text-white text-2xl`}>Question: {currentQuiz?.question}</Text>
+                    <Text style={tw`text-white text-2xl`}>Question {currentIndex + 1}: {currentQuiz?.question}</Text>
                 </View>
                 <Image source={require('../../assets/chemdojo2.jpg')} resizeMode='contain' style={tw`w-full mt-2 mb-5`} />
                 <View style={{ marginTop: 60 }}>
@@ -238,7 +241,7 @@ function Quiz({ navigation, route }) {
                             </TouchableOpacity>
                             <TouchableOpacity style={tw`items-center`}
                                 onPress={() => changeQuestion("next")}
-                                disabled={currentIndex === currentQuiz?.answers.length}
+                                disabled={currentIndex === quiz.length - 1}
                             >
                                 <View style={tw`flex flex-row`}>
                                     <Text>Next</Text>
