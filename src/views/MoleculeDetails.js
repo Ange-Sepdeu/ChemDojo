@@ -1,5 +1,5 @@
 import { useRoute } from '@react-navigation/native'
-import React, { useCallback, useRef, useMemo, useState } from 'react'
+import React, { useCallback, useRef, useMemo, useState, useEffect } from 'react'
 import { Alert, Image, StyleSheet, Text, TextInput } from 'react-native'
 import { ScrollView, View, FlatList, TouchableOpacity } from 'react-native'
 import tw from 'twrnc'
@@ -10,6 +10,8 @@ import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import Carousel from 'react-native-snap-carousel';
 import { Formik } from 'formik'
 import * as Yup from 'yup';
+import courseService from '../api/courseService'
+import Loader from '../components/Loader'
 
 
 
@@ -25,7 +27,8 @@ const validationSchema = Yup.object().shape({
 });
 
 
-function MoleculeDetails({navigation}) {
+function MoleculeDetails({ navigation, route }) {
+  const { item } = route.params;
   const bottomSheetRef = useRef < BottomSheet > (null);
   const snapPoints = useMemo(() => ['10%', '60%'], []);
   const handleSheetChanges = useCallback((index) => {
@@ -33,11 +36,48 @@ function MoleculeDetails({navigation}) {
   }, []);
   const props = dataMolecules[0]
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [courses, setCourses] = useState([]);
 
-  const handleOnSubmit = async (values) => {
+  const getCourses = () => {
+    setLoading(true);
+    courseService.listCourses(item.id).then((response) => {
+      setCourses(response.data)
+    }).finally(() => {
+      setLoading(false);
+    })
+  }
+
+  useEffect(() => {
+    getCourses()
+  }, [])
+  const handleOnSubmit = async (values, { resetForm }) => {
     console.log("submited")
-    if (image?.src.length > 0) {
-      console.log("value", values)
+    if (image?.uri.length > 0) {
+      const response = await courseService.addCourses({
+        uri: image.uri,
+        title: values.title,
+        topicId: item.id,
+        description: values.description,
+      });
+      if (response.statusCode === 200) {
+        Alert.alert("Course added successfully");
+        setCourses([...courses, response.data]);
+        setImage(null)
+        resetForm({
+          values: {
+            title: '',
+            description: '',
+          }
+        })
+
+      } else {
+        if (response?.message) {
+          Alert.alert(response.message);
+        } else {
+          Alert.alert("An error occured");
+        }
+      }
     } else {
       Alert.alert("Enter an Image")
     }
@@ -60,23 +100,27 @@ function MoleculeDetails({navigation}) {
   const renderItem = ({ item }) => (
     <View style={styles.slide}>
       <ScrollView>
-        <Text style={tw`text-3xl mb-5 text-white`}> {props.title} molecule </Text>
-        <Image source={props.src} resizeMode='contain' style={tw`w-full mb--25`} />
-        <Text style={tw`text-gray-400 mt-5`}>Other Details: </Text>
-        <Text style={tw`text-white text-justify`}>{props.text}</Text>
+        <Text style={tw`text-3xl mb-5 text-white`}> {item.title}</Text>
+        <Image source={require('../../assets/chemdojo2.jpg')} resizeMode='contain' style={tw`w-full mb--20 `} />
+        <Text style={tw`text-gray-400 mt-8`}>Description: </Text>
+        <Text style={tw`text-white text-justify`}>{item.description}</Text>
       </ScrollView>
     </View>
   );
   return (
     <View style={tw`w-full`}>
-      <TouchableOpacity 
-      onPress={()=> navigation.navigate("Quiz")}
-      style={styles.quizContainer}>
+      {
+        loading ? <Loader />
+          : null
+      }
+      <TouchableOpacity
+        onPress={() => navigation.navigate("Quiz", {item})}
+        style={styles.quizContainer}>
         <Text style={styles.quizText}>Quiz</Text>
       </TouchableOpacity>
       <View style={tw`bg-blue-950 h-200`}>
         <Carousel
-          data={data}
+          data={courses}
           renderItem={renderItem}
           sliderWidth={400}
           itemWidth={300}
