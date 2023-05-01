@@ -9,6 +9,7 @@ import { Alkanes, Topics } from '../constants'
 import { RadioButton } from 'react-native-paper'
 import quizService from '../api/quizService'
 import Loader from '../components/Loader'
+import { getVariable } from '../services/AsyncStorageMethods'
 
 function Quiz({ navigation, route }) {
     const { item } = route.params;
@@ -19,21 +20,37 @@ function Quiz({ navigation, route }) {
     const [currentQuiz, setCurrentQuiz] = useState({
         answers: [],
         question: "",
+        id: "",
     });
     const [currentSet, setCurrentSet] = useState(false);
+
+    const [userAnswers, setUserAnswers] = useState([]);
+    const [userAns, setUserAns] = useState(null);
 
     const [addAnswer, setAddAnser] = useState("");
     const [question, setQuestion] = useState("");
     const [modalVisible, setModalVisible] = useState(false);
     const [timer, setTimer] = React.useState({ min: 0, sec: 0 })
     const [checked, setChecked] = React.useState({ isCheckEd: false, id: 0 })
-    const handleCheck = (id) => {
-        let i;
-        for (i = 0; i < 4; i++) {
-            setChecked({ isCheckEd: false, id: i })
+    const handleCheck = (ansItem) => {
+        if (!userAnswers.find((item) => (item.answer === ansItem && item.quizId === currentQuiz.id))) {
+            let newUserAnwser = []
+            if (userAnswers.find((item) => item.quizId === currentQuiz.id)) {
+                newUserAnwser = userAnswers.filter(itm => itm.quizId !== currentQuiz.id);
+                setUserAnswers([])
+                setUserAnswers([...newUserAnwser, {
+                    quizId: currentQuiz.id,
+                    answer: ansItem,
+                }])
+            } else {
+                setUserAnswers([...userAnswers, {
+                    quizId: currentQuiz.id,
+                    answer: ansItem,
+                }])
+            }
         }
-        setChecked({ isCheckEd: true, id: id })
     }
+
     const handleAnswerCheck = (id) => {
         setAnswers(answers.reduce((prev, next, index) => {
             if (index === id) {
@@ -54,6 +71,15 @@ function Quiz({ navigation, route }) {
             setLoading(false);
         })
     }
+    const getUserAnswers = async () => {
+        setLoading(true);
+        const userInfo = await getVariable("locationUserInfo")
+        quizService.listUserQuizAnswer(item.id, userInfo.id).then((response) => {
+            setUserAns(response.data)
+        }).finally(() => {
+            setLoading(false);
+        })
+    }
 
     const changeQuestion = (value) => {
         if (value == "next") {
@@ -66,7 +92,8 @@ function Quiz({ navigation, route }) {
     }
 
     useEffect(() => {
-        getQuiz()
+        getQuiz();
+        getUserAnswers();
     }, [])
 
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -77,6 +104,20 @@ function Quiz({ navigation, route }) {
             setCurrentSet(true);
         }
     }, [quiz])
+
+    const [counter, setCounter] = useState(0);
+
+    useEffect(() => {
+        setCounter(0);
+        setCounter(quiz.reduce((prev, next) => {
+            const trueAns = next.answers.find(item => item.correct === true);
+            if(userAns?.answers.find(item => (item.answer === trueAns.answer && item.quizId === next.id))){
+                return prev + 1;
+            }else {
+                return prev
+            }
+        }, 0))
+    }, [quiz, userAns])
 
     const addMethod = () => {
         if (answers.find((item) => item.answer === addAnswer)) {
@@ -118,13 +159,55 @@ function Quiz({ navigation, route }) {
         setLoading(false);
     }
 
+    const removeAnswer = (text) => {
+        setAnswers(answers.filter(item => item.answer != text))
+    }
+
+    const validateAnswer = async () => {
+        setLoading(true);
+        const userInfo = await getVariable("locationUserInfo")
+        const response = await quizService.addUserQuizAnswer({
+            answers: userAnswers,
+            topicId: item.id,
+            userId: userInfo.id
+        });
+        if (response.statusCode === 200) {
+            Alert.alert("Answer saved successfully");
+            getUserAnswers();
+        } else {
+            if (response?.message) {
+                Alert.alert(response.message);
+            } else {
+                Alert.alert("An error occured");
+            }
+        }
+        setLoading(false);
+    }
+
+    const checkAnswerStatus = (item) => {
+        const ans = userAns?.answers.find(item => item.quizId === currentQuiz.id)
+        if (ans) {
+            if (item.correct === true) {
+                if (item.answer === ans.answer) {
+                    return "correct";
+                }
+            }else{
+                if (item.answer === ans.answer) {
+                    return "wrong";
+                }
+
+            }
+            return "changed";
+        }
+        return "unChanged";
+    }
+
     return (
         <View style={tw`p-8 bg-blue-950 h-full`}>
             {
                 loading ? <Loader />
                     : null
             }
-
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -149,13 +232,14 @@ function Quiz({ navigation, route }) {
                             {
                                 answers?.map((item, index) => {
                                     return (
-                                        <View key={index} style={tw`flex flex-row mb-5`}>
+                                        <View key={index} style={[tw`flex flex-row mb-5 items-center`]}>
                                             <RadioButton
                                                 value={item}
                                                 status={item.correct ? 'checked' : 'unchecked'}
                                                 onPress={() => handleAnswerCheck(index)}
                                             />
                                             <Text key={index} style={[tw` text-xl text-justify`, styles.anwserText]}>{String.fromCharCode(index + 65)}. {item.answer}</Text>
+                                            <MaterialIcons name='close' size={20} color="red" style={styles.closeImage} onPress={() => removeAnswer(item.answer)} />
                                         </View>
                                     )
                                 })
@@ -195,6 +279,7 @@ function Quiz({ navigation, route }) {
             </TouchableOpacity>
             <ScrollView style={tw`pb-10`}>
                 <Text style={tw`text-3xl mb-5 text-white`}>Topic: {item.name} </Text>
+                <Text style={tw`text-xl mb-5 text-white`}>Mark: {counter}/{quiz?.length} </Text>
                 <Text style={tw`text-white font-bold`}> GoodLuck </Text>
                 <View style={tw`flex flex-row justify-between mt-5`}>
                     <Text style={tw`text-white text-2xl`}>Question {currentIndex + 1}: {currentQuiz?.question}</Text>
@@ -213,14 +298,20 @@ function Quiz({ navigation, route }) {
                         <Text style={tw`pb-5 text-center text-xl`}>Answers</Text>
                         {
                             currentQuiz?.answers.map((item, index) => {
+                                const status = checkAnswerStatus(item);
                                 return (
-                                    <View key={index} style={tw`flex flex-row mb-5`}>
-                                        <RadioButton
-                                            value={item}
-                                            status={checked.isCheckEd && checked.id === index ? 'checked' : 'unchecked'}
-                                            onPress={() => handleCheck(index)}
-                                        />
-                                        <Text key={index} style={tw` text-xl text-justify`}>{String.fromCharCode(index + 65)}. {item.answer}</Text>
+                                    <View key={index} style={[tw`flex flex-row mb-5  items-center`, 
+                                        status === "correct" ?{backgroundColor: "green"}: status === "wrong"? {backgroundColor: "red"} :null ]}>
+                                        {
+                                            status === "unChanged" ?
+                                                <RadioButton
+                                                    value={item}
+                                                    status={userAnswers.find((uA) => uA.answer === item.answer) ? 'checked' : 'unchecked'}
+                                                    onPress={() => handleCheck(item.answer)}
+                                                />
+                                                : null
+                                        }
+                                        <Text key={index} style={[tw` text-xl text-justify`, styles.anwserText]}>{String.fromCharCode(index + 65)}. {item.answer}</Text>
                                     </View>
                                 )
                             })
@@ -253,9 +344,10 @@ function Quiz({ navigation, route }) {
                                         </View>
                                     </TouchableOpacity>
                                     :
-                                    <TouchableOpacity style={tw`bg-orange-700 p-4 rounded-2xl`} onPress={() => navigation.navigate("QuizInt")}>
-                                        <Text style={tw`text-white`}>Validate</Text>
-                                    </TouchableOpacity>
+                                    userAnswers.length === quiz.length ?
+                                        <TouchableOpacity style={tw`bg-orange-700 p-4 rounded-2xl`} onPress={() => validateAnswer()}>
+                                            <Text style={tw`text-white`}>Validate</Text>
+                                        </TouchableOpacity> : null
                             }
                         </View>
                     </View>

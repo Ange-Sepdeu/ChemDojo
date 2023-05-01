@@ -34,6 +34,35 @@ const addQuiz = async (data) => {
     }
 };
 
+
+const addUserQuizAnswer = async (data) => {
+    try {
+        console.log("data", data)
+        var exist = false;
+        let quizData = {
+            answers: data.answers,
+            topicId: data.topicId,
+            userId: data.userId,
+        };
+        quizData.id = randomString(20)
+        const querySnapshot = await getDocs(collection(db, "userQuizAnswer"));
+            querySnapshot.forEach((doc) => {
+                if (doc.data().userId == quizData.userId && doc.data().topicId == quizData.topicId) {
+                    exist = true;
+                }
+            });
+            if (!exist) {
+                await setDoc(doc(db, "userQuizAnswer", quizData.id ), quizData);
+                return apiResponse(200, "user answer saved created successfully", quizData);
+            }else{
+                return apiResponse(422, "user has already answered this topic", quizData)
+            }
+    } catch (error) {
+        console.log("Error adding quiz", error);
+        return apiResponse(400, "Error adding quiz", error)
+    }
+};
+
 const listQuiz = async (id) => {
     try {
         var quiz = [];
@@ -51,4 +80,22 @@ const listQuiz = async (id) => {
     }
 }
 
-export default {addQuiz, listQuiz};
+
+const listUserQuizAnswer = async (id, uId) => {
+    try {
+        var quiz = {};
+        const querySnapshot = await getDocs(collection(db, "userQuizAnswer"));
+            querySnapshot.forEach((doc) => {
+                if (doc.data().topicId === id && doc.data().userId === uId) {
+                    quiz = doc.data();                    
+                }
+            });
+            return apiResponse(200, "User quiz listed successfully", quiz);
+
+    } catch (error) {
+        console.log("Cant list user quiz", error);
+        return apiResponse(400, "Cant list user quiz", error)
+    }
+}
+
+export default {addQuiz, listQuiz, listUserQuizAnswer, addUserQuizAnswer};
