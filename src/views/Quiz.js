@@ -226,28 +226,37 @@ function Quiz({ navigation, route }) {
                             })
                         }
                         <Text>Time left: {timer.min} : {timer.sec}</Text>
-                        <View style={tw`flex flex-row justify-between items-center`}>
-                            <TouchableOpacity style={tw`items-center`}
-                                disabled={currentIndex === 0}
-                                onPress={() => changeQuestion("prev")}
-                            >
-                                <View style={tw`flex flex-row`}>
-                                    <Entypo name='chevron-left' size={20} />
-                                    <Text>Previous</Text>
-                                </View>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={tw`bg-orange-700 p-4 rounded-2xl`} onPress={() => navigation.navigate("QuizInt")}>
-                                <Text style={tw`text-white`}>Validate</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={tw`items-center`}
-                                onPress={() => changeQuestion("next")}
-                                disabled={currentIndex === quiz.length - 1}
-                            >
-                                <View style={tw`flex flex-row`}>
-                                    <Text>Next</Text>
-                                    <Entypo name='chevron-right' size={20} />
-                                </View>
-                            </TouchableOpacity>
+                        <View style={tw`flex flex-row justify-between items-center mt-5`}>
+                            {
+                                currentIndex !== 0 ?
+                                    <TouchableOpacity style={tw`items-center`}
+                                        disabled={currentIndex === 0}
+                                        onPress={() => changeQuestion("prev")}
+                                    >
+                                        <View style={tw`flex flex-row`}>
+                                            <Entypo name='chevron-left' size={20} />
+                                            <Text>Previous Question</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                    :
+                                    <View></View>
+                            }
+                            {
+                                currentIndex !== quiz.length - 1 ?
+                                    <TouchableOpacity style={tw`items-center`}
+                                        onPress={() => changeQuestion("next")}
+                                        disabled={currentIndex === quiz.length - 1}
+                                    >
+                                        <View style={tw`flex flex-row`}>
+                                            <Text>Next Question</Text>
+                                            <Entypo name='chevron-right' size={20} />
+                                        </View>
+                                    </TouchableOpacity>
+                                    :
+                                    <TouchableOpacity style={tw`bg-orange-700 p-4 rounded-2xl`} onPress={() => navigation.navigate("QuizInt")}>
+                                        <Text style={tw`text-white`}>Validate</Text>
+                                    </TouchableOpacity>
+                            }
                         </View>
                     </View>
                 </BottomSheetScrollView>
