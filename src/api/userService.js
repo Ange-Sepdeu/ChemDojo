@@ -53,6 +53,16 @@ const loginUser = async (userData) => {
     }
 }
 
+const logOut = async () => {
+    try {
+        setVariable(null, "locationUserInfo")
+        return apiResponse(200, "logOut Successfully", {});
+    } catch (error) {
+        console.log("Error login out user", error);
+        return apiResponse(400, "Error login out user", error)
+    }
+}
+
 // productRef.forEach((doc) => {
 //   var data = doc.data();
 //   data["fId"] = doc.id;
@@ -132,4 +142,4 @@ const findUser = async (uid) => {
     }
 
 }
-export default { addUser, loginUser, updateAuthUser, updateUserCollection, updateUserPassword, findUser }
+export default { addUser, loginUser, updateAuthUser, updateUserCollection, updateUserPassword, findUser, logOut }

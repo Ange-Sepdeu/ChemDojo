@@ -33,9 +33,9 @@ function Quiz({ navigation, route }) {
     const [timer, setTimer] = React.useState({ min: 0, sec: 0 })
     const [checked, setChecked] = React.useState({ isCheckEd: false, id: 0 })
     const handleCheck = (ansItem) => {
-        if (!userAnswers.find((item) => (item.answer === ansItem && item.quizId === currentQuiz.id))) {
+        if (!userAnswers?.find((item) => (item.answer === ansItem && item.quizId === currentQuiz.id))) {
             let newUserAnwser = []
-            if (userAnswers.find((item) => item.quizId === currentQuiz.id)) {
+            if (userAnswers?.find((item) => item.quizId === currentQuiz.id)) {
                 newUserAnwser = userAnswers.filter(itm => itm.quizId !== currentQuiz.id);
                 setUserAnswers([])
                 setUserAnswers([...newUserAnwser, {
@@ -110,8 +110,8 @@ function Quiz({ navigation, route }) {
     useEffect(() => {
         setCounter(0);
         setCounter(quiz.reduce((prev, next) => {
-            const trueAns = next.answers.find(item => item.correct === true);
-            if(userAns?.answers.find(item => (item.answer === trueAns.answer && item.quizId === next.id))){
+            const trueAns = next?.answers?.find(item => item.correct === true);
+            if(userAns?.answers?.find(item => (item.answer === trueAns.answer && item.quizId === next.id))){
                 return prev + 1;
             }else {
                 return prev
@@ -120,7 +120,7 @@ function Quiz({ navigation, route }) {
     }, [quiz, userAns])
 
     const addMethod = () => {
-        if (answers.find((item) => item.answer === addAnswer)) {
+        if (answers?.find((item) => item.answer === addAnswer)) {
             Alert.alert("this answer already exist")
         } else {
             if (answers.length === 0) {
@@ -143,8 +143,6 @@ function Quiz({ navigation, route }) {
             if (response.statusCode === 200) {
                 Alert.alert("Quiz added successfully");
                 setQuiz([...quiz, response.data]);
-                setQuestion('');
-                setAnswers("");
                 setModalVisible(!modalVisible);
             } else {
                 if (response?.message) {
@@ -185,7 +183,7 @@ function Quiz({ navigation, route }) {
     }
 
     const checkAnswerStatus = (item) => {
-        const ans = userAns?.answers.find(item => item.quizId === currentQuiz.id)
+        const ans = userAns?.answers?.find(item => item.quizId === currentQuiz.id)
         if (ans) {
             if (item.correct === true) {
                 if (item.answer === ans.answer) {
@@ -306,7 +304,7 @@ function Quiz({ navigation, route }) {
                                             status === "unChanged" ?
                                                 <RadioButton
                                                     value={item}
-                                                    status={userAnswers.find((uA) => uA.answer === item.answer) ? 'checked' : 'unchecked'}
+                                                    status={userAnswers?.find((uA) => uA.answer === item.answer) ? 'checked' : 'unchecked'}
                                                     onPress={() => handleCheck(item.answer)}
                                                 />
                                                 : null
